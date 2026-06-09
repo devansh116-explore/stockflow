@@ -20,6 +20,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+@app.api_route("/", methods=["GET", "HEAD"])
+def root():
+    return {"message": "StockFlow Backend is running!"}
+
 @app.get("/health")
 def health_check():
     return {"status": "healthy", "service": "stockflow-api"}

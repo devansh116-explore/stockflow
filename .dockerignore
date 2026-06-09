@@ -1,6 +1,41 @@
-node_modules
-__pycache__
+# Dependencies
+node_modules/
+__pycache__/
+*.pyc
+venv/
+.venv/
+
+# Environment files (credentials must NOT be in build context)
 .env
-.git
-.vscode
-dist
+.env.*
+!.env.example
+
+# Build artifacts
+dist/
+build/
+
+# Version control
+.git/
+.gitignore
+
+# IDE / Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Docker (prevent recursive context issues)
+docker-compose*.yml
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Testing
+.pytest_cache/
+htmlcov/
+.coverage
+
+# Logs
+*.log
+npm-debug.log*

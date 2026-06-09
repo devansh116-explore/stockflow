@@ -1,0 +1,33 @@
+# Dependencies
+node_modules/
+
+# Build output (rebuilt inside container)
+dist/
+build/
+
+# Environment files (secrets must not be baked into images)
+.env
+.env.*
+!.env.example
+
+# IDE / Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Version control
+.git/
+.gitignore
+
+# Docker
+Dockerfile
+docker-compose*.yml
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*

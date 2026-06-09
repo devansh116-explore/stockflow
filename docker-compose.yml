@@ -1,8 +1,19 @@
+# ============================================
+# StockFlow — Docker Compose (Production)
+# ============================================
+# Services: PostgreSQL, FastAPI Backend, React Frontend
+# All credentials are injected via .env file — never hardcoded.
+# ============================================
+
 name: stockflow
 
 services:
+  # ─────────────────────────────────────────
+  # PostgreSQL Database
+  # ─────────────────────────────────────────
   db:
     image: postgres:16-alpine
+    restart: unless-stopped
     environment:
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_USER: ${POSTGRES_USER}
@@ -10,33 +21,62 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
-      - "5433:5432"
+      - "${DB_PORT:-5433}:5432"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
       interval: 5s
       timeout: 5s
       retries: 5
+      start_period: 10s
+    networks:
+      - stockflow-network
 
+  # ─────────────────────────────────────────
+  # FastAPI Backend
+  # ─────────────────────────────────────────
   backend:
-    build: ./backend
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    restart: unless-stopped
     environment:
       DATABASE_URL: ${DATABASE_URL}
       CORS_ORIGINS: ${CORS_ORIGINS}
     ports:
-      - "8000:8000"
+      - "${BACKEND_PORT:-8000}:8000"
     depends_on:
       db:
         condition: service_healthy
+    networks:
+      - stockflow-network
 
+  # ─────────────────────────────────────────
+  # React + Vite Frontend (served via Nginx)
+  # ─────────────────────────────────────────
   frontend:
     build:
       context: ./frontend
+      dockerfile: Dockerfile
       args:
         VITE_API_URL: ${VITE_API_URL}
+    restart: unless-stopped
     ports:
-      - "5173:80"
+      - "${FRONTEND_PORT:-5173}:80"
     depends_on:
       - backend
+    networks:
+      - stockflow-network
 
+# ─────────────────────────────────────────
+# Named Volumes (persistent storage)
+# ─────────────────────────────────────────
 volumes:
   postgres_data:
+    driver: local
+
+# ─────────────────────────────────────────
+# Networks (service isolation)
+# ─────────────────────────────────────────
+networks:
+  stockflow-network:
+    driver: bridge
